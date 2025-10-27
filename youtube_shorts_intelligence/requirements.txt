@@ -1,0 +1,44 @@
+# YouTube Shorts Intelligence Platform - Dependencies
+
+# Core dependencies
+python-dateutil>=2.8.2
+typing-extensions>=4.5.0
+
+# Data collection (YouTube API simulation - in production would use google-api-python-client)
+# google-api-python-client>=2.100.0  # Uncomment for production
+# google-auth>=2.23.0  # Uncomment for production
+# google-auth-oauthlib>=1.1.0  # Uncomment for production
+
+# AI/LLM
+# anthropic>=0.18.0  # Uncomment for production with Anthropic API
+
+# Async HTTP
+aiohttp>=3.9.0
+asyncio>=3.4.3
+
+# Data processing
+# pandas>=1.5.0  # Optional for advanced data analysis
+# numpy>=1.24.0  # Optional for numerical operations
+
+# Databricks (optional - for production)
+# databricks-sql-connector>=2.9.0  # Uncomment for Databricks integration
+# databricks-sdk>=0.15.0  # Uncomment for Databricks SDK
+
+# Web scraping (optional - for enhanced data collection)
+# playwright>=1.40.0  # Uncomment for web scraping
+# beautifulsoup4>=4.12.0  # Uncomment for HTML parsing
+# lxml>=4.9.0  # Uncomment for XML/HTML parsing
+
+# Utilities
+python-dotenv>=1.0.0  # For loading environment variables
+
+# Development dependencies (optional)
+# pytest>=7.4.0  # For testing
+# pytest-asyncio>=0.21.0  # For async testing
+# black>=23.0.0  # For code formatting
+# pylint>=3.0.0  # For linting
+# mypy>=1.7.0  # For type checking
+
+# Note: The standalone demo works without any of these dependencies!
+# Install with: pip install -r requirements.txt
+# For minimal installation (demo only): pip install python-dotenv

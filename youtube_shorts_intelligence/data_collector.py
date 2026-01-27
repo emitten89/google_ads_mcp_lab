@@ -75,10 +75,81 @@ class YouTubeDataCollector:
     Combines API access with intelligent web scraping
     """
 
+    # Sentiment analysis word lists
+    POSITIVE_WORDS = {
+        'amazing', 'awesome', 'love', 'best', 'great', 'perfect', 'beautiful',
+        'excellent', 'fantastic', 'wonderful', 'incredible', 'brilliant', 'good',
+        'nice', 'wow', 'favorite', 'favourite', 'happy', 'thanks', 'thank',
+        'helpful', 'recommend', 'obsessed', 'stunning', 'gorgeous', 'changed',
+        'works', 'effective', 'results', 'asap', 'need', 'want', 'try'
+    }
+
+    NEGATIVE_WORDS = {
+        'bad', 'terrible', 'awful', 'horrible', 'worst', 'hate', 'disappointed',
+        'disappointing', 'waste', 'useless', 'poor', 'broken', 'scam', 'fake',
+        'overpriced', 'cheap', 'annoying', 'boring', 'fail', 'failed', 'wrong',
+        'never', 'not', 'dont', "don't", 'didnt', "didn't", 'wont', "won't",
+        'avoid', 'regret', 'return', 'returned', 'refund'
+    }
+
+    POSITIVE_EMOJIS = {
+        '😍', '❤️', '💕', '💖', '💗', '💓', '💞', '💘', '🥰', '😘', '😊', '🤩',
+        '✨', '🔥', '💯', '👍', '👏', '🙌', '💪', '❤', '💝', '😱', '🎉', '♥️'
+    }
+
+    NEGATIVE_EMOJIS = {
+        '😡', '😠', '😤', '👎', '💔', '😢', '😭', '😞', '😔', '🙄', '😒', '🤮',
+        '🤢', '💩', '😑', '😬'
+    }
+
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key
         self.base_url = "https://www.googleapis.com/youtube/v3"
         self.shorts_duration_threshold = 60  # Shorts are <= 60 seconds
+
+    def _analyze_sentiment(self, text: str) -> str:
+        """
+        Analyze sentiment of text using keyword and emoji matching.
+        Returns 'positive', 'negative', or 'neutral'.
+        """
+        if not text:
+            return "neutral"
+
+        text_lower = text.lower()
+        words = set(re.findall(r'\b\w+\b', text_lower))
+
+        # Count positive and negative indicators
+        positive_score = 0
+        negative_score = 0
+
+        # Check words
+        positive_score += len(words & self.POSITIVE_WORDS)
+        negative_score += len(words & self.NEGATIVE_WORDS)
+
+        # Check emojis
+        for emoji in self.POSITIVE_EMOJIS:
+            positive_score += text.count(emoji)
+        for emoji in self.NEGATIVE_EMOJIS:
+            negative_score += text.count(emoji)
+
+        # Check for negation patterns that flip sentiment
+        negation_patterns = [
+            r"\b(not|don't|didn't|doesn't|won't|wouldn't|can't|couldn't)\s+\w*\s*(good|great|love|like|amazing|work)",
+            r"\b(not|no)\s+recommend",
+        ]
+        for pattern in negation_patterns:
+            if re.search(pattern, text_lower):
+                # Flip the sentiment
+                positive_score, negative_score = negative_score, positive_score
+                break
+
+        # Determine sentiment
+        if positive_score > negative_score:
+            return "positive"
+        elif negative_score > positive_score:
+            return "negative"
+        else:
+            return "neutral"
 
     async def search_shorts(
         self,
@@ -240,18 +311,24 @@ Subscribe for more beauty content!"""
             "Wow the results! 😱",
             "Does this really work?",
             "My new favorite product",
-            "Thanks for sharing this! ❤️"
+            "Thanks for sharing this! ❤️",
+            "Not sure about this one",
+            "Meh, it's okay I guess",
+            "Terrible product, don't buy 👎",
+            "Waste of money, so disappointed 😤",
+            "This didn't work for me at all"
         ]
 
         for i in range(min(max_results, 10)):
+            comment_text = mock_comment_texts[i % len(mock_comment_texts)]
             comments.append(CommentData(
                 video_id=video_id,
                 comment_id=f"comment_{video_id}_{i}",
-                text=mock_comment_texts[i % len(mock_comment_texts)],
+                text=comment_text,
                 author=f"User{i}",
                 like_count=10 + (i * 5),
                 published_at=datetime.now().isoformat(),
-                sentiment="positive"
+                sentiment=self._analyze_sentiment(comment_text)
             ))
 
         return comments

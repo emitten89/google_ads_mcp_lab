@@ -7,8 +7,8 @@ python>=3.8
 asyncio-throttle==1.0.1
 
 # HTTP Clients
-aiohttp==3.9.1
-requests==2.31.0
+aiohttp==3.13.3
+requests==2.32.4
 
 # Data Processing
 pandas==2.1.4
@@ -56,7 +56,7 @@ pytest-cov==4.1.0
 pytest-mock==3.12.0
 
 # Code Quality (development only)
-black==23.12.1
+black==24.3.0
 flake8==6.1.0
 mypy==1.8.0
 isort==5.13.2
